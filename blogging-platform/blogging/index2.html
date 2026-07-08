@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HashBlog - Blog Editor & Feed</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        :root {
+            --primary: #ff80ab;
+            --secondary: #ff99c8;
+            --dark: #5a2d3a;
+            --light: #ffccdc;
+            --accent: #e3ceef;
+        }
+        
+        html.dark-mode {
+            --primary: #d946ef;
+            --secondary: #ec4899;
+            --dark: #1a1a2e;
+            --light: #0f3460;
+            --accent: #16213e;
+        }
+        
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        body {
+            background: linear-gradient(-45deg, #ff80ab, #ffccdc, #ff99c8, #fce4ec);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: #333;
+            min-height: 100vh;
+            padding: 20px 0;
+            position: relative;
+            transition: background 0.3s ease;
+        }
+        
+        html.dark-mode body {
+            background: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #533483);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: #e0e0e0;
+        }
+        
+        /* Navigation */
+        nav {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: fadeInDown 0.6s ease;
+        }
+        
+        html.dark-mode nav {
+            background: rgba(30, 30, 46, 0.8);
+        }
+        
+        nav .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--dark);
+            cursor: pointer;
+        }
+        
+        html.dark-mode nav .logo {
+            color: #ff80ab;
+        }
+        
+        .nav-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+        }
+        
+        .nav-center a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        html.dark-mode .nav-center a {
+            color: #e0e0e0;
+        }
+        
+        nav .nav-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .search-box {
+            padding: 10px 15px;
+            border: 2px solid var(--dark);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            width: 200px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(90, 45, 58, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--dark);
+            padding: 8px 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--dark);
+            transition: all 0.3s ease;
+        }
+        
+        html.dark-mode .theme-toggle {
+            border: 2px solid #ff80ab;
+            color: #ff80ab;
+        }
+        
+        .theme-toggle:hover {
+            transform: rotate(20deg);
+        }
+        
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 30px;
+            padding: 30px 20px;
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .widget {
+            background: linear-gradient(135deg, rgba(255, 153, 200, 0.7), rgba(255, 128, 171, 0.7));
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            animation: slideInLeft 0.8s ease;
+        }
+        
+        html.dark-mode .widget {
+            background: linear-gradient(135deg, rgba(217, 70, 239, 0.5), rgba(236, 72, 153, 0.5));
+        }
+        
+        .widget h3 {
+            color: white;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .widget-item {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+        
+        .widget-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        /* Blog Form/Editor */
+        .editor-section {
+            background: linear-gradient(135deg, rgba(227, 206, 239, 0.8), rgba(255, 153, 200, 0.8));
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: popIn 0.6s ease;
+        }
+        
+        html.dark-mode .editor-section {
+            background: linear-gradient(135deg, rgba(83, 52, 131, 0.6), rgba(217, 70, 239, 0.6));
+        }
+        
+        .editor-section h2 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        .form-group label {
+            display: block;
+            color: white;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: white;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .editor-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .editor-btn {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .editor-btn:hover {
+            background: white;
+            color: #ff80ab;
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: white;
+            color: #ff80ab;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        html.dark-mode .submit-btn {
+            color: #d946ef;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Blog Cards */
+        .blog-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideUp 0.6s ease;
+            border-left: 5px solid #ff80ab;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        html.dark-mode .blog-card {
+            background: rgba(30, 30, 46, 0.8);
+            color: #e0e0e0;
+            border-left: 5px solid #d946ef;
+        }
+        
+        .blog-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .blog-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 3s infinite;
+            pointer-events: none;
+        }
+        
+        .blog-header {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .blog-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+        
+        html.dark-mode .blog-title {
+            color: #ff80ab;
+        }
+        
+        .blog-author {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        html.dark-mode .blog-author {
+            color: #a0a0a0;
+        }
+        
+        .blog-content {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 15px;
+            max-height: 100px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+        
+        html.dark-mode .blog-content {
+            color: #c0c0c0;
+        }
+        
+        .blog-content.expanded {
+            max-height: none;
+        }
+        
+        .blog-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        html.dark-mode .blog-meta {
+            color: #999;
+        }
+        
+        .blog-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .blog-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 12px;
+            background: none;
+            border: 2px solid #ff80ab;
+            color: #ff80ab;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        html.dark-mode .blog-action-btn {
+            border: 2px solid #d946ef;
+            color: #d946ef;
+        }
+        
+        .blog-action-btn:hover {
+            background: #ff80ab;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        html.dark-mode .blog-action-btn:hover {
+            background: #d946ef;
+        }
+        
+        .blog-action-btn.active {
+            background: #ff80ab;
+            color: white;
+        }
+        
+        html.dark-mode .blog-action-btn.active {
+            background: #d946ef;
+        }
+        
+        /* Right Sidebar - Trending/Stats */
+        .stats-widget {
+            background: linear-gradient(135deg, rgba(255, 153, 200, 0.7), rgba(255, 128, 171, 0.7));
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            animation: slideInRight 0.8s ease;
+        }
+        
+        html.dark-mode .stats-widget {
+            background: linear-gradient(135deg, rgba(217, 70, 239, 0.5), rgba(236, 72, 153, 0.5));
+        }
+        
+        .stats-widget h3 {
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 5px;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .nav-center {
+                gap: 15px;
+                font-size: 14px;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 200;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            animation: fadeInDown 0.3s ease;
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: popIn 0.3s ease;
+        }
+        
+        html.dark-mode .modal-content {
+            background: rgba(30, 30, 46, 0.95);
+            color: #e0e0e0;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ff80ab;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #ff80ab;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo" onclick="window.location.href='index.html'" style="cursor: pointer;">
+            <i class="fas fa-pen-fancy"></i> HashBlog
+        </div>
+        <div class="nav-center">
+            <a href="#feed">Feed</a>
+            <a href="#trending">Trending</a>
+            <a href="#my-blogs">My Blogs</a>
+        </div>
+        <div class="nav-right">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search blogs...">
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <div class="widget">
+                <h3><i class="fas fa-lightbulb"></i> Categories</h3>
+                <div class="widget-item" onclick="filterByCategory('all')">All Posts</div>
+                <div class="widget-item" onclick="filterByCategory('web')">Web Development</div>
+                <div class="widget-item" onclick="filterByCategory('mobile')">Mobile Apps</div>
+                <div class="widget-item" onclick="filterByCategory('ai')">AI & ML</div>
+                <div class="widget-item" onclick="filterByCategory('devops')">DevOps</div>
+                <div class="widget-item" onclick="filterByCategory('career')">Career</div>
+            </div>
+            
+            <div class="widget">
+                <h3><i class="fas fa-star"></i> Quick Tips</h3>
+                <div class="widget-item">Write clear titles</div>
+                <div class="widget-item">Use proper formatting</div>
+                <div class="widget-item">Add tags & categories</div>
+                <div class="widget-item">Engage with community</div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Editor Section -->
+            <div class="editor-section">
+                <h2><i class="fas fa-pen-fancy"></i> Create New Blog Post</h2>
+                <form onsubmit="submitBlog(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="author">Your Name</label>
+                            <input type="text" id="author" placeholder="Enter your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" required>
+                                <option value="">Select Category</option>
+                                <option value="web">Web Development</option>
+                                <option value="mobile">Mobile Apps</option>
+                                <option value="ai">AI & ML</option>
+                                <option value="devops">DevOps</option>
+                                <option value="career">Career</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="title">Blog Title</label>
+                        <input type="text" id="title" placeholder="Enter an engaging title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Formatting Options</label>
+                        <div class="editor-toolbar">
+                            <button type="button" class="editor-btn" onclick="insertFormat('**bold**')">
+                                <i class="fas fa-bold"></i> Bold
+                            </button>
+                            <button type="button" class="editor-btn" onclick="insertFormat('*italic*')">
+                                <i class="fas fa-italic"></i> Italic
+                            </button>
+                            <button type="button" class="editor-btn" onclick="insertFormat('# Heading')">
+                                <i class="fas fa-heading"></i> Heading
+                            </button>
+                            <button type="button" class="editor-btn" onclick="insertFormat('- List item')">
+                                <i class="fas fa-list"></i> List
+                            </button>
+                            <button type="button" class="editor-btn" onclick="insertFormat('`code`')">
+                                <i class="fas fa-code"></i> Code
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="content">Content</label>
+                        <textarea id="content" rows="8" placeholder="Start writing your amazing blog post..." required></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tags">Tags (comma-separated)</label>
+                            <input type="text" id="tags" placeholder="e.g., javascript, react, web">
+                        </div>
+                        <div class="form-group">
+                            <label for="readTime">Estimated Read Time (minutes)</label>
+                            <input type="number" id="readTime" min="1" value="5" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Publish Blog
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Blog Feed -->
+            <div id="blogFeed">
+                <h2 style="color: white; margin-bottom: 20px; animation: fadeInUp 0.8s ease;">
+                    <i class="fas fa-rss"></i> Blog Feed
+                </h2>
+                <!-- Blogs will be inserted here -->
+            </div>
+        </div>
+        
+        <!-- Right Sidebar -->
+        <aside class="sidebar">
+            <div class="stats-widget">
+                <h3><i class="fas fa-chart-line"></i> Statistics</h3>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalBlogs">0</div>
+                    <div class="stat-label">Total Posts</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalViews">0</div>
+                    <div class="stat-label">Total Views</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalLikes">0</div>
+                    <div class="stat-label">Total Likes</div>
+                </div>
+            </div>
+            
+            <div class="stats-widget">
+                <h3><i class="fas fa-fire"></i> Trending Tags</h3>
+                <div class="widget-item">#JavaScript</div>
+                <div class="widget-item">#React</div>
+                <div class="widget-item">#WebDevelopment</div>
+                <div class="widget-item">#DevOps</div>
+                <div class="widget-item">#AI</div>
+            </div>
+        </aside>
+    </div>
+    
+    <script>
+        let blogs = [];
+        let allBlogs = [];
+        
+        // Load theme
+        window.addEventListener('load', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark-mode');
+            }
+            updateThemeIcon();
+            loadBlogs();
+            updateStats();
+        });
+        
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark-mode');
+            localStorage.setItem('theme', html.classList.contains('dark-mode') ? 'dark' : 'light');
+            updateThemeIcon();
+        }
+        
+        function updateThemeIcon() {
+            const icon = document.querySelector('.theme-toggle i');
+            if (document.documentElement.classList.contains('dark-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        }
+        
+        function insertFormat(format) {
+            const textarea = document.getElementById('content');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selectedText = text.substring(start, end);
+            
+            let newText = '';
+            if (format.includes('**')) {
+                newText = '**' + (selectedText || 'bold text') + '**';
+            } else if (format.includes('*')) {
+                newText = '*' + (selectedText || 'italic text') + '*';
+            } else if (format.includes('#')) {
+                newText = '\n# ' + (selectedText || 'Heading') + '\n';
+            } else if (format.includes('-')) {
+                newText = '\n- ' + (selectedText || 'List item') + '\n';
+            } else if (format.includes('`')) {
+                newText = '`' + (selectedText || 'code') + '`';
+            }
+            
+            textarea.value = text.substring(0, start) + newText + text.substring(end);
+            textarea.focus();
+        }
+        
+        function submitBlog(event) {
+            event.preventDefault();
+            
+            const blog = {
+                id: Date.now(),
+                author: document.getElementById('author').value,
+                title: document.getElementById('title').value,
+                content: document.getElementById('content').value,
+                category: document.getElementById('category').value,
+                tags: document.getElementById('tags').value.split(',').map(t => t.trim()),
+                readTime: document.getElementById('readTime').value,
+                date: new Date().toLocaleDateString(),
+                likes: 0,
+                views: 0,
+                comments: 0,
+                liked: false
+            };
+            
+            blogs.unshift(blog);
+            allBlogs = [...blogs];
+            localStorage.setItem('blogs', JSON.stringify(blogs));
+            
+            // Reset form
+            document.querySelector('form').reset();
+            
+            // Refresh feed
+            displayBlogs(blogs);
+            updateStats();
+            
+            // Show success message
+            alert('Blog published successfully! 🎉');
+        }
+        
+        function displayBlogs(blogsToDisplay) {
+            const feed = document.getElementById('blogFeed');
+            if (blogsToDisplay.length === 0) {
+                feed.innerHTML = '<div style="text-align: center; padding: 40px; color: white;"><p>No blogs yet. Start writing!</p></div>';
+                return;
+            }
+            
+            feed.innerHTML = blogsToDisplay.map((blog, index) => `
+                <div class="blog-card" style="animation-delay: ${index * 0.1}s;">
+                    <div class="blog-header">
+                        <div>
+                            <div class="blog-title">${blog.title}</div>
+                            <div class="blog-author">
+                                <i class="fas fa-user-circle"></i> ${blog.author}
+                            </div>
+                        </div>
+                        <span style="background: #ff80ab; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px;">
+                            ${blog.category}
+                        </span>
+                    </div>
+                    
+                    <div class="blog-content">${blog.content}</div>
+                    
+                    <div class="blog-meta">
+                        <span><i class="fas fa-calendar"></i> ${blog.date}</span>
+                        <span><i class="fas fa-clock"></i> ${blog.readTime} min read</span>
+                        <span><i class="fas fa-eye"></i> ${blog.views} views</span>
+                    </div>
+                    
+                    <div style="margin: 10px 0;">
+                        ${blog.tags.map(tag => `<span style="background: rgba(255, 128, 171, 0.3); color: white; padding: 4px 8px; border-radius: 5px; font-size: 12px; display: inline-block; margin-right: 5px;">#${tag}</span>`).join('')}
+                    </div>
+                    
+                    <div class="blog-actions">
+                        <button class="blog-action-btn ${blog.liked ? 'active' : ''}" onclick="toggleLike(${blog.id})">
+                            <i class="fas fa-heart"></i> <span id="likes-${blog.id}">${blog.likes}</span>
+                        </button>
+                        <button class="blog-action-btn" onclick="toggleComment(${blog.id})">
+                            <i class="fas fa-comment"></i> <span id="comments-${blog.id}">${blog.comments}</span>
+                        </button>
+                        <button class="blog-action-btn" onclick="shareBlog('${blog.title}')">
+                            <i class="fas fa-share"></i> Share
+                        </button>
+                        <button class="blog-action-btn" onclick="editBlog(${blog.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="blog-action-btn" onclick="deleteBlog(${blog.id})" style="border-color: #ff6b6b; color: #ff6b6b;">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function toggleLike(blogId) {
+            const blog = blogs.find(b => b.id === blogId);
+            if (blog) {
+                blog.liked = !blog.liked;
+                blog.likes += blog.liked ? 1 : -1;
+                localStorage.setItem('blogs', JSON.stringify(blogs));
+                document.getElementById(`likes-${blogId}`).textContent = blog.likes;
+                document.querySelector(`[onclick="toggleLike(${blogId})"]`).classList.toggle('active');
+                updateStats();
+            }
+        }
+        
+        function toggleComment(blogId) {
+            alert('Comment feature coming soon! 💬');
+        }
+        
+        function shareBlog(title) {
+            const text = `Check out this amazing blog: "${title}" on HashBlog!`;
+            if (navigator.share) {
+                navigator.share({ title: 'HashBlog', text: text });
+            } else {
+                alert(`Share: ${text}`);
+            }
+        }
+        
+        function editBlog(blogId) {
+            const blog = blogs.find(b => b.id === blogId);
+            if (blog) {
+                document.getElementById('author').value = blog.author;
+                document.getElementById('title').value = blog.title;
+                document.getElementById('content').value = blog.content;
+                document.getElementById('category').value = blog.category;
+                document.getElementById('tags').value = blog.tags.join(', ');
+                document.getElementById('readTime').value = blog.readTime;
+                
+                deleteBlog(blogId);
+                document.querySelector('form').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        function deleteBlog(blogId) {
+            blogs = blogs.filter(b => b.id !== blogId);
+            localStorage.setItem('blogs', JSON.stringify(blogs));
+            displayBlogs(blogs);
+            updateStats();
+        }
+        
+        function filterByCategory(category) {
+            if (category === 'all') {
+                displayBlogs(blogs);
+            } else {
+                const filtered = blogs.filter(b => b.category === category);
+                displayBlogs(filtered);
+            }
+        }
+        
+        document.getElementById('searchBox').addEventListener('keyup', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = blogs.filter(b => 
+                b.title.toLowerCase().includes(query) ||
+                b.content.toLowerCase().includes(query) ||
+                b.author.toLowerCase().includes(query)
+            );
+            displayBlogs(filtered);
+        });
+        
+        function loadBlogs() {
+            const saved = localStorage.getItem('blogs');
+            if (saved) {
+                blogs = JSON.parse(saved);
+                allBlogs = [...blogs];
+                displayBlogs(blogs);
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('totalBlogs').textContent = blogs.length;
+            document.getElementById('totalViews').textContent = blogs.reduce((sum, b) => sum + parseInt(b.views || 0), 0) + Math.floor(Math.random() * 1000);
+            document.getElementById('totalLikes').textContent = blogs.reduce((sum, b) => sum + parseInt(b.likes || 0), 0);
+        }
+    </script>
+</body>
+</html>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        /* Decorative pen icon */
+        .pen-icon {
+            width: 40px;
+            height: 40px;
+            position: relative;
+            margin: 0 auto 20px;
+        }
+        .pen-icon::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 30px;
+            background: #5a2d3a;
+            transform: rotate(-45deg);
+            left: 16px;
+            top: 5px;
+            border-radius: 4px;
+        }
+        .pen-icon::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 12px solid #5a2d3a;
+            transform: rotate(-45deg);
+            left: 10px;
+            top: 2px;
+        }
+
+        /* Container decorative circles */
+        .decorative-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: 0;
+        }
+        .container-circle-1 {
+            width: 100px;
+            height: 100px;
+            top: -20px;
+            right: -20px;
+        }
+        .container-circle-2 {
+            width: 60px;
+            height: 60px;
+            bottom: -10px;
+            left: -10px;
+        }
+
+        /* Decorative wave */
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 15px;
+            background: linear-gradient(45deg, transparent 33.33%, #5a2d3a 33.33%, #5a2d3a 66.66%, transparent 66.66%);
+            background-size: 30px 15px;
+            opacity: 0.3;
+        }
+        /* Animated background */
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        body {
+            background: linear-gradient(-45deg, #ff80ab, #ffccdc, #ff99c8, #fce4ec);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            padding: 20px 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background floating circles */
+        .floating-circle {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            z-index: -1;
+            animation: float 6s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(3px);
+        }
+
+        .bg-circle-1 {
+            width: 200px;
+            height: 200px;
+            top: -50px;
+            right: 10%;
+            animation-delay: -1.5s;
+        }
+
+        .bg-circle-2 {
+            width: 150px;
+            height: 150px;
+            bottom: 10%;
+            left: 5%;
+            animation-delay: -4.5s;
+        }
+
+        .bg-circle-3 {
+            width: 120px;
+            height: 120px;
+            top: 40%;
+            right: 25%;
+            animation-delay: -2.5s;
+        }
+        .welcome-box {
+            background: #ff80ab;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Welcome box decoration */
+        .welcome-decoration {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            right: -30px;
+            top: -30px;
+            background: linear-gradient(45deg, #5a2d3a, transparent);
+            transform: rotate(45deg);
+            opacity: 0.2;
+        }
+        .welcome-box h1 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        .welcome-box p {
+            color: white;
+            margin-bottom: 20px;
+        }
+        .welcome-box button {
+            background: #5a2d3a;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .welcome-box button:hover {
+            background: #47222e;
+        }
+        .blog-form {
+            background: #ff99c8;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .blog-form input, .blog-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+        .blog-form button {
+            background: #5a2d3a;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .blog-form button:hover {
+            background: #47222e;
+        }
+        .blog-content {
+            display: none;
+            background: white;
+            padding: 30px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Blog content decorations */
+        .blog-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ff80ab, #ff99c8);
+        }
+        
+        .blog-content h2 {
+            color: #5a2d3a;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        
+        .blog-content p {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .navigation-buttons {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .back-button {
+            padding: 12px 25px;
+            background: #5a2d3a;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #47222e;
+        }
+
+        .read-more {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #5a2d3a;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .read-more:hover {
+            background: #47222e;
+        }
+
+        .extra-content {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-circle bg-circle-1"></div>
+    <div class="floating-circle bg-circle-2"></div>
+    <div class="floating-circle bg-circle-3"></div>
+    <div class="welcome-box">
+        <div class="welcome-decoration"></div>
+        <div class="decorative-circle container-circle-1"></div>
+        <div class="decorative-circle container-circle-2"></div>
+        <h1>Welcome to Your Blog</h1>
+        <p>Express your thoughts and share your stories with the world</p>
+        <button onclick="startBlogging()">Start Writing</button>
+        <div class="wave"></div>
+    </div>
+    
+    <div class="blog-form" style="display: none">
+        <div class="pen-icon"></div>
+        <div class="decorative-circle container-circle-1"></div>
+        <div class="decorative-circle container-circle-2"></div>
+        <h2>Start Blogging</h2>
+        <input type="text" id="name" placeholder="Enter your name">
+        <input type="text" id="title" placeholder="Enter blog title">
+        <textarea id="content" rows="6" placeholder="Start writing..."></textarea>
+        <button onclick="submitBlog()">Submit</button>
+        <div class="wave"></div>
+    </div>
+    
+    <div class="navigation-buttons">
+        <button class="back-button" onclick="window.location.href='index.html'">Back</button>
+    </div>
+
+    <div class="blog-content" id="blog-display">
+        <div class="decorative-circle container-circle-1"></div>
+        <div class="decorative-circle container-circle-2"></div>
+        <h2 id="display-title"></h2>
+        <p><strong>By:</strong> <span id="display-name"></span></p>
+        <p id="display-content"></p>
+        <div class="extra-content" id="extra-content">
+            <p>Share your thoughts, experiences, and insights with the world. Your unique perspective matters!</p>
+        </div>
+        <a href="#" class="read-more" onclick="toggleContent(event)">Read More</a>
+        <button onclick="editBlog()">Edit</button>
+        <div class="wave"></div>
+    </div>
+    
+    <script>
+        function toggleContent(event) {
+            event.preventDefault();
+            const extraContent = document.getElementById("extra-content");
+            const readMoreBtn = event.target;
+            
+            if (extraContent.style.display === "none" || !extraContent.style.display) {
+                extraContent.style.display = "block";
+                readMoreBtn.textContent = "Show Less";
+            } else {
+                extraContent.style.display = "none";
+                readMoreBtn.textContent = "Read More";
+            }
+        }
+
+        function startBlogging() {
+            document.querySelector(".welcome-box").style.display = "none";
+            document.querySelector(".blog-form").style.display = "block";
+        }
+        
+        function submitBlog() {
+            let name = document.getElementById("name").value;
+            let title = document.getElementById("title").value;
+            let content = document.getElementById("content").value;
+            
+            if (name && title && content) {
+                document.getElementById("display-name").innerText = name;
+                document.getElementById("display-title").innerText = title;
+                document.getElementById("display-content").innerText = content;
+                
+                document.querySelector(".blog-form").style.display = "none";
+                document.getElementById("blog-display").style.display = "block";
+            } else {
+                alert("Please fill in all fields.");
+            }
+        }
+        
+        function editBlog() {
+            document.querySelector(".blog-form").style.display = "block";
+            document.getElementById("blog-display").style.display = "none";
+        }
+    </script>
+</body>
+</html>

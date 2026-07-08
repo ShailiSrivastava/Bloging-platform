@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - HashBlog</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        body {
+            background: linear-gradient(-45deg, #ff80ab, #ffccdc, #ff99c8, #fce4ec);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            max-width: 1000px;
+            align-items: center;
+        }
+
+        .left-section h1 {
+            font-size: 48px;
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .left-section p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .testimonial {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .testimonial p {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .testimonial-author {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .auth-form {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .auth-form h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #5a2d3a;
+        }
+
+        .auth-form p {
+            color: #999;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #ff80ab;
+            box-shadow: 0 0 15px rgba(255, 128, 171, 0.2);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #ff80ab, #ff99c8);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 128, 171, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #999;
+        }
+
+        .form-footer a {
+            color: #ff80ab;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .loading-spinner {
+            display: none;
+            margin-right: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .left-section {
+                display: none;
+            }
+
+            .auth-form {
+                padding: 30px 20px;
+            }
+
+            .auth-form h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-section">
+            <h1>Welcome Back</h1>
+            <p>Continue sharing your knowledge and connecting with the developer community.</p>
+            
+            <div class="testimonial">
+                <p>"HashBlog transformed how I share my coding journey. The community is amazing!"</p>
+                <div class="testimonial-author">- Sarah Dev</div>
+            </div>
+
+            <div class="testimonial">
+                <p>"My articles have reached thousands of developers. Highly recommended!"</p>
+                <div class="testimonial-author">- Alex Code</div>
+            </div>
+        </div>
+
+        <div class="auth-form">
+            <h2>Welcome Back</h2>
+            <p>Sign in to your account</p>
+
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Your password" required>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <span class="loading-spinner"><i class="fas fa-spinner fa-spin"></i></span>
+                    <span class="btn-text">Sign In</span>
+                </button>
+            </form>
+
+            <div class="form-footer">
+                Don't have an account? <a href="register.html">Create one</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import BlogAPI from './js/api.js';
+
+        window.handleLogin = async (event) => {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const errorEl = document.getElementById('errorMessage');
+            const successEl = document.getElementById('successMessage');
+            const submitBtn = document.querySelector('.submit-btn');
+            const spinner = document.querySelector('.loading-spinner');
+            const btnText = document.querySelector('.btn-text');
+
+            // Reset messages
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+
+            // Show loading
+            submitBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Signing In...';
+
+            try {
+                const result = await BlogAPI.login(email, password);
+
+                if (result.success) {
+                    successEl.textContent = 'Login successful! Redirecting...';
+                    successEl.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index2.html';
+                    }, 2000);
+                } else {
+                    errorEl.textContent = result.message || 'Login failed';
+                    errorEl.style.display = 'block';
+                }
+            } catch (error) {
+                errorEl.textContent = error.message;
+                errorEl.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Sign In';
+            }
+        };
+    </script>
+</body>
+</html>
